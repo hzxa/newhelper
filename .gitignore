@@ -21,3 +21,20 @@
 
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
+.idea
+
+*/target/
+/target
+*/*/target
+build/
+*/src/generated/
+*/*/src/generated/
+.gradle/
+
+.project
+.classpath
+.settings/org.eclipse.m2e.core.prefs
+*/.classpath
+*.prefs
+
+*.iml

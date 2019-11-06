@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.cttl.newhelper.ui.MainController">
+   <top>
+      <MenuBar BorderPane.alignment="CENTER">
+        <menus>
+          <Menu mnemonicParsing="false" text="文件">
+            <items>
+              <MenuItem fx:id="startMenuItem" mnemonicParsing="false" onAction="#startAction" text="运行" />
+                  <MenuItem fx:id="exitMenuItem" mnemonicParsing="false" onAction="#exitAction" text="退出" />
+            </items>
+          </Menu>
+          <Menu mnemonicParsing="false" text="帮助">
+            <items>
+              <MenuItem mnemonicParsing="false" text="关于" />
+            </items>
+          </Menu>
+        </menus>
+      </MenuBar>
+   </top>
+   <center>
+      <TextArea fx:id="centerTextField" editable="false" prefHeight="335.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <cursor>
+            <Cursor fx:constant="DEFAULT" />
+         </cursor>
+      </TextArea>
+   </center>
+   <bottom>
+      <HBox prefHeight="19.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+         <children>
+            <Label fx:id="progressStatus" text="未开始" />
+            <ProgressBar fx:id="progressBar" prefHeight="18.0" prefWidth="218.0" progress="0.0" />
+            <ProgressIndicator fx:id="progressBarInd" progress="0.0" />
+         </children>
+      </HBox>
+   </bottom>
+</BorderPane>
