@@ -1,6 +1,7 @@
 package com.cttl.newhelper.service;
 
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
 
 public class DbExecuteInThread implements Callable<String>{
 
@@ -15,7 +16,11 @@ public class DbExecuteInThread implements Callable<String>{
 
     @Override
     public String call() throws Exception {
-        dataBaseService.excuteSql(sql);
+        try{
+            dataBaseService.excuteSql(sql);
+        }catch (Exception e){
+            throw  new ExecutionException(e.getCause());
+        }
         return "";
     }
 }

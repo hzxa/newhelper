@@ -3,9 +3,13 @@ package com.cttl.newhelper.ui;
 import com.cttl.newhelper.domain.ColumnInfo;
 import com.cttl.newhelper.service.DataBaseService;
 import com.cttl.newhelper.service.DbExecuteInThread;
+import com.cttl.newhelper.utils.AlterUtil;
 import com.cttl.newhelper.utils.LogUtil;
+import javafx.beans.property.ReadOnlyDoubleProperty;
 import javafx.beans.value.ObservableNumberValue;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -49,8 +53,7 @@ public class MainController {
     @FXML
     private Label progressStatus;
 
-    private ExecutorService executorService;
-
+    private ThreadPoolExecutor executorService;
 
     public static void setMainStage(Stage stage){
         mainStage = stage;
@@ -94,6 +97,16 @@ public class MainController {
     @FXML
     private void startAction(ActionEvent event){
 //        LogUtil.info("startAction");
+        if(executorService.getActiveCount()>0){
+            AlterUtil.errorAlert("", "已有任务正在运行",null);
+            return;
+        }
+        LogUtil.info("开始测试集");
+        centerTextField.clear();
+        progressBar.progressProperty().unbind();
+        progressBarInd.progressProperty().unbind();
+        progressStatus.textProperty().unbind();
+
         progressStatus.setText("未开始");
         progressBar.setProgress(0.0);
         progressBarInd.setProgress(0.0);
@@ -101,19 +114,32 @@ public class MainController {
 
         if(startTaskController.isReadyToload()){
             progressStatus.setText("正在运行");
-            loadTestCase(startTaskController.getFile());
+//            loadTestCase(startTaskController.getFile());
+            DataBaseExecuteTask task = new DataBaseExecuteTask(startTaskController.getFile(),
+                    DataBaseService.instance(),
+                    tableDialogController);
+            progressBar.progressProperty().bind(task.progressProperty());
+            progressBarInd.progressProperty().bind(task.progressProperty());
+            progressStatus.textProperty().bind(task.messageProperty());
+            executorService.submit(task);
         }
     }
 
     @FXML
     private void exitAction(ActionEvent event){
 //        LogUtil.info("exitAction");
+        if(executorService.getActiveCount()>0){
+            if(!AlterUtil.confirmationAlert("", "还有任务未完成，确认强行退出?")) {
+                return;
+            }
+        }
         mainStage.close();
     }
 
     public void loadTestCase(File file){
         boolean display = true;
         try{
+
             BufferedReader br = new BufferedReader(new InputStreamReader(new FileInputStream(file),"GBK"));
             String l = null;
             tableDialogController.setDataBaseService(DataBaseService.instance());
@@ -132,6 +158,7 @@ public class MainController {
                 char firstChar = line.charAt(0);
                 switch (firstChar){
                     case '[':
+
                         if(display){
                             LogUtil.info(line.substring(1));
                         }
@@ -146,18 +173,28 @@ public class MainController {
                         break;
                     case '>':
                         line = line.substring(1);
+                        LogUtil.info(line);
                         String tableName = getTableName(line);
                         ColumnInfo info = DataBaseService.instance().excuteQuery(line);
                         info.setTableName(tableName);
                         tableDialogController.display(info);
+
                     default:
-                        //sql
+//                        sql
+                        LogUtil.info(line);
                         DataBaseService.instance().excuteSql(line);
-                        DbExecuteInThread inThread = new DbExecuteInThread(DataBaseService.instance(), line);
-                        Future<String> task = executorService.submit(inThread);
-                        while(!task.isDone()){
-                            Thread.sleep(1000);
-                        }
+//                        DbExecuteInThread inThread = new DbExecuteInThread(DataBaseService.instance(), line);
+//                        Future<String> task = executorService.submit(inThread);
+//                        int count = 0;
+//                        while(!task.isDone()){
+//                            Thread.sleep(1000);
+//                            count++;
+//                            if(count % 60 ==0){
+//                                LogUtil.info("ongoing...");
+//                                System.out.println("ongoing" + String.valueOf(System.currentTimeMillis()));
+//                                progressStatus.setText("正在运行...");
+//                            }
+//                        }
                         break;
                 }
                 processCount++;
